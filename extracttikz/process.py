@@ -6,7 +6,7 @@ from extracttikz.parser.tex import extract_tikz, clean_document, expand_inputs
 from extracttikz.builder.tex import build_tex_file_contents
 from extracttikz.builder.name import build_file_name
 from extracttikz.compiler.latexmk import LatexMK
-from extracttikz.converter.pdf2image import convert_pdf
+from extracttikz.converter.pdftoimage import convert_pdf
 
 
 def extract_tikz_from_file(filename, expand=True):
