@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="extracttikz",
-    version="0.0.5",
+    version="0.0.1",
     author="Luighi Viton-Zorrilla",
     author_email="luighiavz@gmail.com",
     description="Script to extract tikz from file",
