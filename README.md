@@ -56,9 +56,25 @@ extracttikz [options] sourcefile.tex
 
   Save to output file
 
-* `-C, --compile`
+* `--overwrite`
 
-  Compile files
+  Overwrite existing extracted files in directory
+
+* `-B, --build`
+
+  Build extracted tikzpictures
+
+* `-b FOLDER, --build-folder=FOLDER`
+
+  Save compilation result pdf to build folder
+
+* `-E, --export`
+
+  Export built pdfs to images
+
+* `-e FOLDER, --export-folder=FOLDER`
+
+  Save converted image to export folder
 
 
 ## License

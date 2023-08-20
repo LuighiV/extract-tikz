@@ -87,9 +87,9 @@ def compile_file(compiler, filepath):
     return compiler.run(filepath)
 
 
-def compile_list_files(list_files):
+def compile_list_files(list_files, outdir="build"):
 
-    compiler = LatexMK()
+    compiler = LatexMK(outdir=outdir)
     list_outputs = []
     for file in list_files:
         outputfile = compile_file(compiler, file)

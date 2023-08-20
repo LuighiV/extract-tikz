@@ -11,12 +11,44 @@ usage = "usage: %prog [options] inputfile"
 parser = OptionParser(usage=usage, prog="dlgsheet")
 parser.add_option("-l", "--log-level", dest="loglevel",
                   help="set log level. Available options: " + ",".join(levels))
+
 parser.add_option("-o", "--output-folder", dest="output_folder",
                   help="save to output folder", metavar="FOLDER")
 
-parser.add_option("-C", "--compile", action="store_true",
-                  dest="build_pictures",
-                  default=False, help="build extracted pictures")
+parser.add_option("--overwrite", action="store_true", dest="overwrite",
+                  default=False,
+                  help="overwrite existing extracted files in directory")
+
+parser.add_option("-B", "--build", action="store_true", dest="build_pdf",
+                  default=False, help="build extracted tikzpictures")
+
+parser.add_option("-b",
+                  "--build-folder",
+                  dest="build_folder",
+                  help="save compilation result pdf to build folder",
+                  metavar="FOLDER")
+
+parser.add_option("-E", "--export", action="store_true", dest="export_images",
+                  default=False, help="export built pdfs to images")
+
+parser.add_option("-e",
+                  "--export-folder",
+                  dest="export_folder",
+                  help="save converted image to export folder",
+                  metavar="FOLDER")
+
+
+def check_folder_option(variable, default_value, option_string):
+
+    if (variable is not None):
+        foldername = variable
+    else:
+        foldername = default_value
+        logger.warning(
+            "Not folder name provided via {}. Usign default: {}".format(
+                option_string, foldername))
+
+    return foldername
 
 
 def main():
@@ -43,22 +75,40 @@ def main():
 
     logger.debug(options)
 
-    DEFAULT_FOLDER_NAME = "output"
+    DEFAULT_OUTPUT_FOLDER_NAME = "output"
+    DEFAULT_BUILD_FOLDER_NAME = "build"
+    DEFAULT_EXPORT_FOLDER_NAME = "exported"
 
-    if (options.output_folder is not None):
-        foldername = options.output_folder
-    else:
-        foldername = DEFAULT_FOLDER_NAME
-        logger.warning(
-            "Not folder name provided via --output-folder. Usign default: " +
-            foldername)
+    output_folder = check_folder_option(options.output_folder,
+                                        DEFAULT_OUTPUT_FOLDER_NAME,
+                                        option_string="--output-folder")
 
-    list_files = generate_files_from_tex(filename)
+    list_files = generate_files_from_tex(filename,
+                                         expand=True,
+                                         folder=output_folder,
+                                         overwrite=options.overwrite)
     logger.debug(list_files)
-    pdf_files = compile_list_files(list_files)
-    logger.debug(pdf_files)
+    logger.info(
+        "Extracted {} {}tikzpictures".format(
+            len(list_files),
+            "" if options.overwrite else "new "))
 
-    image_files = export_list_pdf(pdf_files)
-    logger.debug(image_files)
+    if options.build_pdf:
+
+        build_folder = check_folder_option(options.build_folder,
+                                           DEFAULT_BUILD_FOLDER_NAME,
+                                           option_string="--build-folder")
+        pdf_files = compile_list_files(list_files, outdir=build_folder)
+        logger.debug(pdf_files)
+
+        if options.export_images:
+
+            export_folder = check_folder_option(
+                options.export_folder,
+                DEFAULT_EXPORT_FOLDER_NAME,
+                option_string="--export-folder")
+            image_files = export_list_pdf(pdf_files, outdir=export_folder)
+            logger.debug(image_files)
 
     logger.info("Task finished")
+    sys.exit(0)
