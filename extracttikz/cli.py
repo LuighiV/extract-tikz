@@ -5,6 +5,7 @@ from pathlib import Path
 from extracttikz import config
 from extracttikz.logger import logger, levels, setLoggerLevel
 from extracttikz.process import export_list_pdf, generate_files_from_tex, compile_list_files
+from extracttikz.io.find import find_files
 
 
 usage = "usage: %prog [options] inputfile"
@@ -37,6 +38,14 @@ parser.add_option("-e",
                   help="save converted image to export folder",
                   metavar="FOLDER")
 
+parser.add_option("--only-build", action="store_true", dest="only_build",
+                  default=False,
+                  help="only build files in directory")
+
+parser.add_option("--only-export", action="store_true", dest="only_export",
+                  default=False,
+                  help="only export images from pdf")
+
 
 def check_folder_option(variable, default_value, option_string):
 
@@ -55,16 +64,12 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    if len(args) != 1:
+    full_process = options.only_build is False and options.only_export is False
+
+    if len(args) != 1 and full_process:
         parser.error(
             "Incorrect number of arguments. Must provide the input file.")
 
-    if Path(args[0]).exists():
-        filename = args[0]
-    else:
-        logger.error(
-            f"File {args[0]} doesn't exist. Please, provide a valid path ")
-        sys.exit(-1)
 
     if options.loglevel is not None:
         loglevel = options.loglevel
@@ -79,35 +84,68 @@ def main():
     DEFAULT_BUILD_FOLDER_NAME = "build"
     DEFAULT_EXPORT_FOLDER_NAME = "exported"
 
-    output_folder = check_folder_option(options.output_folder,
+
+
+    list_files=[]
+    pdf_files=[]
+
+    if full_process:
+
+        output_folder = check_folder_option(options.output_folder,
                                         DEFAULT_OUTPUT_FOLDER_NAME,
                                         option_string="--output-folder")
 
-    list_files = generate_files_from_tex(filename,
-                                         expand=True,
-                                         folder=output_folder,
-                                         overwrite=options.overwrite)
-    logger.debug(list_files)
-    logger.info(
-        "Extracted {} {}tikzpictures".format(
-            len(list_files),
-            "" if options.overwrite else "new "))
+        if Path(args[0]).exists():
+            filename = args[0]
+        else:
+            logger.error(
+                f"File {args[0]} doesn't exist. Please, provide a valid path ")
+            sys.exit(-1)
 
-    if options.build_pdf:
+        list_files = generate_files_from_tex(filename,
+                                             expand=True,
+                                             folder=output_folder,
+                                             overwrite=options.overwrite)
+        logger.debug(list_files)
+        logger.info(
+            "Extracted {} {}tikzpictures".format(
+                len(list_files),
+                "" if options.overwrite else "new "))
 
-        build_folder = check_folder_option(options.build_folder,
+    elif options.only_build:
+
+        output_folder = check_folder_option(options.output_folder,
+                                        DEFAULT_OUTPUT_FOLDER_NAME,
+                                        option_string="--output-folder")
+        list_files = find_files(output_folder, ".tex")
+        logger.info("Located {} tikzpictures in folder {}".format( len(list_files), output_folder))
+
+
+
+    if (full_process and options.build_pdf) or options.only_build:
+
+        build_folder=check_folder_option(options.build_folder,
                                            DEFAULT_BUILD_FOLDER_NAME,
                                            option_string="--build-folder")
-        pdf_files = compile_list_files(list_files, outdir=build_folder)
+        pdf_files=compile_list_files(list_files, outdir=build_folder)
         logger.debug(pdf_files)
 
-        if options.export_images:
+    elif options.only_export:
 
-            export_folder = check_folder_option(
+        build_folder=check_folder_option(options.build_folder,
+                                           DEFAULT_BUILD_FOLDER_NAME,
+                                           option_string="--build-folder")
+        pdf_files = find_files(build_folder, ".pdf")
+        logger.info("Located {} pdf in folder {}".format( len(pdf_files),
+                                                         build_folder))
+
+    if (full_process and options.export_images and options.build_pdf) or options.only_export:
+
+            export_folder=check_folder_option(
                 options.export_folder,
                 DEFAULT_EXPORT_FOLDER_NAME,
                 option_string="--export-folder")
-            image_files = export_list_pdf(pdf_files, outdir=export_folder)
+            image_files=export_list_pdf(pdf_files, outdir=export_folder)
             logger.debug(image_files)
 
     logger.info("Task finished")
