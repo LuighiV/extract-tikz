@@ -46,6 +46,16 @@ parser.add_option("--only-export", action="store_true", dest="only_export",
                   default=False,
                   help="only export images from pdf")
 
+parser.add_option("--export-fmt",
+                  dest="export_format",
+                  help="format for exported images",
+                  metavar="FORMAT")
+
+parser.add_option("--export-dpi",
+                  dest="export_dpi",
+                  help="DPI for exported images",
+                  metavar="DPI")
+
 
 def check_folder_option(variable, default_value, option_string):
 
@@ -84,6 +94,9 @@ def main():
     DEFAULT_BUILD_FOLDER_NAME = "build"
     DEFAULT_EXPORT_FOLDER_NAME = "exported"
 
+    VALID_FORMAT_OPTIONS=["png","jpg","tiff"]
+    DEFAULT_EXPORT_IMAGE_FMT="jpg"
+    DEFAULT_EXPORT_IMAGE_DPI=200
 
 
     list_files=[]
@@ -141,12 +154,39 @@ def main():
 
     if (full_process and options.export_images and options.build_pdf) or options.only_export:
 
-            export_folder=check_folder_option(
-                options.export_folder,
-                DEFAULT_EXPORT_FOLDER_NAME,
-                option_string="--export-folder")
-            image_files=export_list_pdf(pdf_files, outdir=export_folder)
-            logger.debug(image_files)
+        export_folder=check_folder_option(
+            options.export_folder,
+            DEFAULT_EXPORT_FOLDER_NAME,
+            option_string="--export-folder")
+
+        if options.export_format:
+            if options.export_format in VALID_FORMAT_OPTIONS:
+                fmt=options.export_format
+            else:
+                fmt=DEFAULT_EXPORT_IMAGE_FMT
+                logger.warning("Not valid entered format: {}. Default to {}".format(options.export_format,fmt))
+
+        else:
+            fmt=DEFAULT_EXPORT_IMAGE_FMT
+
+        extension=".{}".format(fmt)
+
+        if options.export_dpi:
+            if options.export_dpi.isdigit():
+                dpi=int(options.export_dpi)
+
+            else:
+                dpi=DEFAULT_EXPORT_IMAGE_DPI
+                logger.warning("Not valid entered DPI: {}. Default to {}".format(options.export_dpi,dpi))
+
+        else:
+            dpi=DEFAULT_EXPORT_IMAGE_DPI
+
+
+        image_files=export_list_pdf(pdf_files,
+                                    outdir=export_folder,
+                                    extension=extension,dpi=dpi)
+        logger.debug(image_files)
 
     logger.info("Task finished")
     sys.exit(0)

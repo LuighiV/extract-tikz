@@ -98,21 +98,21 @@ def compile_list_files(list_files, outdir="build"):
     return list_outputs
 
 
-def export_pdf(pdfpath, outdir="exported", extension=".jpg"):
+def export_pdf(pdfpath, outdir="exported", extension=".jpg", dpi=200):
 
     imagepath = Path(outdir) / "".join([Path(pdfpath).stem,
                                        extension])
 
-    convert_pdf(pdfpath, imagepath)
+    convert_pdf(pdfpath, imagepath, extension=extension, dpi=dpi)
 
     return imagepath
 
 
-def export_list_pdf(list_pdfs, outdir="exported", extension=".jpg"):
+def export_list_pdf(list_pdfs, outdir="exported", extension=".jpg", dpi=200):
 
     list_outputs = []
     for pdffile in list_pdfs:
-        outputfile = export_pdf(pdffile, outdir, extension)
+        outputfile = export_pdf(pdffile, outdir, extension, dpi=dpi)
         list_outputs.append(outputfile)
 
     return list_outputs

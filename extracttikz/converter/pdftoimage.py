@@ -4,9 +4,13 @@ from pdf2image.pdf2image import convert_from_path
 from pathlib import Path
 
 
-def convert_pdf(pdfpath, imagepath=None, extension=".jpg", dpi=1000):
+def convert_pdf(pdfpath, imagepath=None, extension=".jpg", dpi=200):
 
-    images = convert_from_path(pdfpath, dpi=dpi, use_pdftocairo=True)
+
+    transparent = bool(extension==".png")
+
+    images = convert_from_path(pdfpath, dpi=dpi, use_pdftocairo=True,
+                               transparent=transparent)
 
     # Only export first page
     if imagepath is None:
