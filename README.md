@@ -52,9 +52,9 @@ extracttikz [options] sourcefile.tex
 
   Set log level. Available options: critical, error, warning, info, debug
 
-* `-o FILE, --output-file=FILE`
+* `-o FOLDER, --output-folder=FOLDER`
 
-  Save to output file
+  Save to output folder
 
 * `--overwrite`
 
@@ -76,6 +76,129 @@ extracttikz [options] sourcefile.tex
 
   Save converted image to export folder
 
+* `--only-build`
+
+  Only build files in directory
+
+* `--only-export`
+
+  Only export images from pdf
+
+* `--export-fmt=FORMAT`
+
+  Format for exported images
+
+* `--export-dpi=DPI`
+
+  DPI for exported images
+
+
+## Cases of use
+
+### General workflow
+
+Normally, we can have a LaTeX project that can have the following structure:
+```
+- contents/ 
+   |- introduction.tex
+   |- theory.tex
+   |- design.tex
+   |- ...
+- thesis.tex
+```
+
+The main tex file here is `thesis.tex` which includes several `\input` commands
+to include the subfiles.
+
+#### Only extract 
+
+Then, the aim is to extract all the tikzpictures environments in individual
+files which can compile and export to images.
+
+To perform that we can use the following command:
+```
+extracttikz thesis.tex
+```
+
+We can specify the folder by `--output-folder=<foldername>` otherwise, it will
+use `output` relative to the path from which is run the command.
+
+If we run again the command, it will not generate again the files as they
+exist in the folder. However, we can force the generation (for example, to
+update with latest changes in original document), by adding the option
+`--overwrite`:
+```
+extracttikz --overwrite thesis.tex
+```
+
+The resulting files are located under the output folder and will have the
+following structure:
+```
+- output/ 
+   |- ch01-002-image_label.tex
+   |- ch04-002-image_label.tex
+   |- ...
+   |- a01-005-image_label.tex
+```
+
+Where the file name comes from the chapter number where it is located, the
+figure from which it comes from and the label of the figure environment where
+the tikzpicture is placed.
+
+> 📝**Note:** the tikzpictures are only exported if they are inside a figure
+> environment, otherwise they will be skipped.
+
+#### Extract build and export
+
+If we want to also build and export the tikzpicture into images, we can use the
+options `-B` and `-E` to perform such actions:
+```
+extracttikz -B -E thesis.tex
+```
+Some important notes to highlight here are:
+
++ If the options are appended after files were generated, as a second command, it will only
+    apply to new extracted files (if doesn't have changes, it will not generate
+    anything). To avoid that, you can append the option `--overwrite`.
+
++ If you only append `-B` it will only build the pdfs, but if you append only
+    `-E` it won't do anything as the export stage requires the build first.
+
++ The directory where the compilation results (pdfs) are placed is the declared by the
+    option `--build-folder=folder` otherwise it will take the default `build` relative 
+    to the path from which the command is executed.
+
++ The directory where the exported images are placed is the declared by the
+    option `--export-folder=folder` otherwise it will take the default `exported` relative 
+    to the path from which the command is executed.
+
+We also have the option to specify the exported format or the DPI for exported
+images by the options `--export-fmt` and `--export-dpi`, respectively. For
+example:
+```
+extracttikz --overwrite -B -E --export-dpi=1000 --export-fmt=png thesis.tex
+```
+
+### Only build pdfs
+
+Sometimes, we just require building the list of tikzpictures that are extracted
+in the output folder. 
+```
+extracttikz --only-build 
+```
+> 📝**Note:** This will export **ALL** the tex files in the output folder,
+> either the default one or the declared by the option `--output-folder`.
+
+### Only export to images
+
+This can be followed by another option that only export the list of pdf files
+that are located in the build folder to images.
+```
+extracttikz --only-export --export-dpi=1000 --export-fmt=png
+```
+> 📝**Note:** Equally to the previous option, it will convert **ALL** the pdf
+> files located in the build folder, either the default one or the declared by
+> the option `--output-build`.
 
 ## License
 
