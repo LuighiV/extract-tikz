@@ -2,14 +2,13 @@ from optparse import OptionParser
 import sys
 from pathlib import Path
 
-from extracttikz import config
 from extracttikz.logger import logger, levels, setLoggerLevel
 from extracttikz.process import export_list_pdf, generate_files_from_tex, compile_list_files
 from extracttikz.io.find import find_files
 
 
 usage = "usage: %prog [options] inputfile"
-parser = OptionParser(usage=usage, prog="dlgsheet")
+parser = OptionParser(usage=usage, prog="extracttikz")
 parser.add_option("-l", "--log-level", dest="loglevel",
                   help="set log level. Available options: " + ",".join(levels))
 
