@@ -43,6 +43,7 @@ wrapper_template = r"""% wrapper_template.tex
 \usepackage{tikz}
 \usepackage{xcolor}
 \usepackage{array}
+\usepackage{siunitx}
 \usetikzlibrary{arrows.meta}
 \usetikzlibrary{decorations}
 \usetikzlibrary{decorations.pathreplacing}
